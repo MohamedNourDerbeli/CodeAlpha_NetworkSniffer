@@ -20,6 +20,12 @@ def select_interface():
     print("No active interface found. Using default.")
     return None, None
 
+def handle_tcp(packet):
+    tcp = packet[TCP]
+    ip = packet[IP]
+
+    return f"TCP {ip.src}:{tcp.sport} → {ip.dst}:{tcp.dport} [{tcp.flags}]"
+
 def process_packet(packet, local_ip):
     if IP in packet:
         ip_layer = packet[IP]
@@ -34,8 +40,9 @@ def process_packet(packet, local_ip):
         print(f"{color}[IP] {src} → {dst} | Protocol: {proto_name}{Style.RESET_ALL}")
 
         if TCP in packet:
-            tcp = packet[TCP]
-            print(f"{Fore.YELLOW}  └── [TCP] Port: {tcp.sport} → {tcp.dport}{Style.RESET_ALL}")
+            tcp_output = handle_tcp(packet)
+            if tcp_output:
+                print(f"{Fore.YELLOW}  └── {tcp_output.strip()}{Style.RESET_ALL}")
         elif UDP in packet:
             udp = packet[UDP]
             print(f"{Fore.YELLOW}  └── [UDP] Port: {udp.sport} → {udp.dport}{Style.RESET_ALL}")
